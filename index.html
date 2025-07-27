@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-to-Emotion Zine Generator</title>
+    <style>
+        /* All your existing CSS from the original file goes here. */
+        /* I am adding some new styles for the form and results at the end. */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f08bc9 0%, #bb76f7 100%);
+            --secondary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-gradient: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            --text-white: #ffffff;
+            --text-dark: #333333;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 15px;
+            --transition: all 0.3s ease;
+            
+            /* Light mode variables */
+            --bg-primary: linear-gradient(135deg, #f08bc9 0%, #bb76f7 100%);
+            --bg-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-generate: linear-gradient(to right, #cb70db, #d8a08c);
+            --bg-zine: linear-gradient(135deg, #c06ad6, #e5b269);
+            --bg-last: linear-gradient(135deg, #b467f5, #e9b85c);
+            --bg-footer: linear-gradient(135deg, #b568f4, #f3cb56);
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+        }
+
+        /* Dark mode variables */
+        .darkmode {
+            --primary-gradient: linear-gradient(135deg, #821855, #541681);
+            --secondary-gradient: linear-gradient(135deg, #2a2a3e, #1a1a2e);
+            --accent-gradient: linear-gradient(45deg, #e74c3c, #c0392b);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.4);
+            
+            --bg-primary: linear-gradient(135deg, #821855, #541681);
+            --bg-secondary: linear-gradient(135deg, #2a2a3e, #1a1a2e);
+            --bg-generate: linear-gradient(to right, #7b2d7e, #8b4513);
+            --bg-zine: linear-gradient(135deg, #6b2775, #b8860b);
+            --bg-last: linear-gradient(135deg, #5d2e6b, #cd853f);
+            --bg-footer: linear-gradient(135deg, #6a2c70, #daa520);
+            --card-bg: #2c2c3e;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            background: var(--bg-secondary);
+            transition: var(--transition);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background: var(--bg-primary);
+            padding: 80px 15px 40px;
+        }
+        
+        .hero-content h1 {
+            font-size: clamp(2rem, 8vw, 6rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #fccc78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: var(--accent-gradient);
+            color: var(--text-white);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .generate {
+            text-align: center;
+            padding: 60px 15px;
+            background: var(--bg-generate);
+            transition: var(--transition);
+        }
+
+        .generate h2 {
+            color: var(--text-white);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 30px;
+        }
+
+        /* --- NEW STYLES FOR THE FORM AND RESULTS --- */
+        #generator-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-white);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        #audio_file {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            background-color: transparent;
+            color: white;
+            cursor: pointer;
+        }
+        #audio_file::file-selector-button {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .language-selector label {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        #generate-btn {
+            padding: 15px 30px;
+            font-size: clamp(14px, 3vw, 16px);
+            border: none;
+            border-radius: 10px;
+            background: var(--accent-gradient);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 120px;
+            box-shadow: var(--shadow-light);
+        }
+        #generate-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #results-section {
+            padding: 60px 15px;
+            background: var(--bg-secondary);
+            display: none; /* Hidden by default */
+        }
+        .results-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+        }
+        .results-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .result-item {
+            margin-bottom: 30px;
+        }
+        .result-item h3 {
+            border-bottom: 2px solid var(--text-primary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        #poem-output {
+            white-space: pre-wrap; /* To respect newlines in the poem */
+            font-style: italic;
+            line-height: 1.8;
+        }
+        #playlist-output a {
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: var(--glass-bg);
+            color: var(--text-primary);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        #playlist-output a:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        #gif-output img {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            display: block;
+            margin: 0 auto;
+        }
+        #error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        /* End of new styles */
+    </style>
+</head>
+<body>
+    <!-- Your existing nav, hero, etc. sections go here -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Transform Your Voice Into Art</h1>
+            <p>Speak your mind, share a feeling, or recall a memory. Our AI will analyze your voice to create a personalized zine with a curated playlist, a unique poem, and a mood-matching GIF.</p>
+            <a href="#generator" class="cta-button">Create Your Zine</a>
+        </div>
+    </section>
+
+    <section class="generate" id="generator">
+        <div class="container">
+            <!-- UPDATED FORM SECTION -->
+            <form id="generator-form" enctype="multipart/form-data">
+                <h2>Share Your Voice</h2>
+                <p style="color: white; margin-bottom: 20px; font-size: 1.1rem;">Upload a short audio recording of your voice.</p>
+                
+                <div class="form-group">
+                    <label for="language">1. Select Language / زبان منتخب کریں</label>
+                    <div class="language-selector">
+                        <label><input type="radio" name="language" value="english" checked> English</label>
+                        <label><input type="radio" name="language" value="urdu"> Urdu</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="audio_file">2. Upload Audio File</label>
+                    <input type="file" id="audio_file" name="audio_file" accept="audio/*" required>
+                </div>
+                
+                <button type="submit" id="generate-btn">Generate My Zine</button>
+                <div id="error-message"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- NEW RESULTS SECTION -->
+    <section id="results-section">
+        <div class="results-container">
+            <h2 id="results-title">Your Emotion Zine</h2>
+            
+            <div class="result-item">
+                <h3 id="transcription-title">📝 Transcription</h3>
+                <p id="transcription-output"></p>
+            </div>
+
+            <div class="result-item">
+                <h3 id="gif-title">🖼️ Mood GIF</h3>
+                <div id="gif-output"></div>
+            </div>
+
+            <div class="result-item">
+                <h3 id="playlist-title">🎧 Playlist</h3>
+                <div id="playlist-output"></div>
+            </div>
+
+            <div class="result-item">
+                <h3 id="poem-title">📜 Poem</h3>
+                <p id="poem-output"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Your other sections like #zine, .last-body, .footer can go here -->
+
+    <script>
+        const form = document.getElementById('generator-form');
+        const generateBtn = document.getElementById('generate-btn');
+        const resultsSection = document.getElementById('results-section');
+        const errorMessage = document.getElementById('error-message');
+
+        // Output elements
+        const resultsTitle = document.getElementById('results-title');
+        const transcriptionTitle = document.getElementById('transcription-title');
+        const transcriptionOutput = document.getElementById('transcription-output');
+        const gifTitle = document.getElementById('gif-title');
+        const gifOutput = document.getElementById('gif-output');
+        const playlistTitle = document.getElementById('playlist-title');
+        const playlistOutput = document.getElementById('playlist-output');
+        const poemTitle = document.getElementById('poem-title');
+        const poemOutput = document.getElementById('poem-output');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent the default form submission
+
+            // --- UI Updates: Loading state ---
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Analyzing...';
+            errorMessage.style.display = 'none';
+            resultsSection.style.display = 'none';
+
+            const formData = new FormData();
+            const audioFile = document.getElementById('audio_file').files[0];
+            const language = document.querySelector('input[name="language"]:checked').value;
+
+            if (!audioFile) {
+                showError("Please select an audio file.");
+                return;
+            }
+
+            formData.append('audio_file', audioFile);
+            formData.append('language', language);
+
+            try {
+                // --- API Call - CHANGE THIS URL ---
+                const response = await fetch( "https://fd220d6b91b7.ngrok-free.app", {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // --- Populate Results ---
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            } finally {
+                // --- UI Updates: Reset button ---
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate My Zine';
+            }
+        });
+
+        function displayResults(data) {
+            const isUrdu = data.language === 'urdu';
+            
+            // Set titles based on language
+            resultsTitle.textContent = isUrdu ? 'آپ کا جذباتی زین' : `Your Emotion Zine: ${data.emotion}`;
+            transcriptionTitle.textContent = isUrdu ? '📝 متن' : '📝 Transcription';
+            gifTitle.textContent = isUrdu ? '🖼️ موڈ GIF' : '🖼️ Mood GIF';
+            playlistTitle.textContent = isUrdu ? '🎧 گانے' : `🎧 Playlist for ${data.emotion}`;
+            poemTitle.textContent = isUrdu ? '📜 نظم' : '📜 Poem';
+
+            // Populate content
+            transcriptionOutput.textContent = data.transcription;
+            gifOutput.innerHTML = `<img src="${data.gif_url}" alt="${data.emotion} gif">`;
+            poemOutput.textContent = data.poem;
+
+            // Populate playlist
+            playlistOutput.innerHTML = ''; // Clear previous playlist
+            if (data.playlist && data.playlist.length > 0) {
+                data.playlist.forEach(track => {
+                    const link = document.createElement('a');
+                    link.href = track.url;
+                    link.target = '_blank';
+                    link.textContent = `🎵 ${track.name} - ${track.artist}`;
+                    playlistOutput.appendChild(link);
+                });
+            } else {
+                playlistOutput.textContent = isUrdu ? 'اس جذبے کے لیے کوئی گانا نہیں ملا۔' : 'No songs found for this emotion.';
+            }
+
+            // Show the results and scroll to them
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(message) {
+            errorMessage.textContent = `❌ Error: ${message}`;
+            errorMessage.style.display = 'block';
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate My Zine';
+        }
+
+        // --- Smooth scrolling for anchor links ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
