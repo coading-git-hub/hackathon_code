@@ -359,12 +359,37 @@
             formData.append('audio_file', audioFile);
             formData.append('language', language);
 
+            // Debug: Log what we're sending
+            console.log('Sending data:', {
+                audioFile: audioFile ? {
+                    name: audioFile.name,
+                    size: audioFile.size,
+                    type: audioFile.type
+                } : 'No file',
+                language: language
+            });
+
             try {
                 // --- API Call - CHANGE THIS URL ---
                 const response = await fetch( "https://fd220d6b91b7.ngrok-free.app", {
                     method: 'POST',
                     body: formData,
                 });
+
+                // Check if response is JSON
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    // If not JSON, get the text to see what's being returned
+                    const responseText = await response.text();
+                    console.error('Non-JSON response:', responseText);
+                    
+                    // Show a more helpful error message
+                    if (responseText.includes("<!doctype") || responseText.includes("<html")) {
+                        throw new Error("API server is not responding correctly. Please check if the server is running and the URL is correct.");
+                    } else {
+                        throw new Error(`Server returned non-JSON response. Status: ${response.status}`);
+                    }
+                }
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -378,7 +403,11 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                showError(error.message);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack
+                });
+                showError(`Error: ${error.message}`);
             } finally {
                 // --- UI Updates: Reset button ---
                 generateBtn.disabled = false;
